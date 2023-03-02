@@ -1,0 +1,20 @@
+#include<iostream>
+using namespace std;
+
+const int MAXN = 1e6;
+const int mod = 100003;
+int a[MAXN];
+
+int main() {
+	int n, k;
+	cin >> n >> k;
+	a[0] = 1;
+	for (int i = 1; i <= n; i++) {
+		for (int j = 1; j <= k&&j<=i; j++) {
+			a[i] = (a[i] % mod + a[i - j] % mod) % mod;
+		}
+	}
+	cout << a[n];
+	return 0;
+}
+
