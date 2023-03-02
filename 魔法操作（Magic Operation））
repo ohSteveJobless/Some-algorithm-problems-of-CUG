@@ -55,21 +55,15 @@ double dfs(int cur, int this_sibling) {
 	}
 	//递归出口1：找到满足要求的叶子结点
 	if (cnt_b == 0) {
-
-		string tmp = cur_str;
 		return 1.0 / this_sibling;
-
 	}
 	//特判剪枝
 	if (d - cur >= cnt_a + cnt_b) {
-
-		string tmp = cur_str;
 		return 1.0 / this_sibling;
 	}
 
 	//递归出口2：未找到满足要求的叶子结点
 	if (cur == d && cnt_b != 0) {
-		string tmp = cur_str;
 		return 0;
 	}
 
