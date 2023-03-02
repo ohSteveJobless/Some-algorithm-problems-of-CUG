@@ -1,0 +1,141 @@
+#include<iostream>
+#include<iomanip>
+#include<unordered_map>
+#include<string.h>
+using namespace std;
+
+const int MAXN = 10;
+int a[MAXN] = { 0 };  //明
+int b[MAXN] = { 0 };  //亮
+int cnt_a, cnt_b; //明和亮总石头数
+int n, m;   //明：n，亮：m
+int d;
+unordered_map<string, double> map;  //哈希表
+
+//生成状态压缩字符串
+string getList(int seta[], int setb[]) {
+
+
+	string tmp = "000000000000000";
+	for (int i = 0; i <= 6; i++) {
+		char ch1 = seta[i] + 48;
+		char ch2 = setb[i] + 48;
+		tmp[i] = ch1;
+		tmp[i + 8] = ch2;
+	}
+	tmp[7] = ',';
+	return tmp;
+}
+
+
+double dfs(int cur, int this_sibling) {
+	//记录概率：子树概率之和
+	//回传概率：子树概率之和/本层兄弟结点个数
+
+	int next_sib = 0;
+	//获得状态压缩字符串，并计算子树个数next_sib：
+	int set_a[7] = { 0 };
+	int set_b[7] = { 0 };
+	for (int i = 1; i <= n; i++) {
+		set_a[a[i]]++;
+		if (a[i] != 0)next_sib++;
+
+	}
+	for (int i = 1; i <= m; i++) {
+		set_b[b[i]]++;
+		if (b[i] != 0)next_sib++;
+	}
+	string cur_str = getList(set_a, set_b);
+
+	//利用哈希表的记录剪枝：
+	bool flag = map.count(cur_str);
+	if (flag) {
+		double rate = map.at(cur_str);
+		return rate / this_sibling;
+	}
+	//递归出口1：找到满足要求的叶子结点
+	if (cnt_b == 0) {
+
+		string tmp = cur_str;
+		return 1.0 / this_sibling;
+
+	}
+	//特判剪枝
+	if (d - cur >= cnt_a + cnt_b) {
+
+		string tmp = cur_str;
+		return 1.0 / this_sibling;
+	}
+
+	//递归出口2：未找到满足要求的叶子结点
+	if (cur == d && cnt_b != 0) {
+		string tmp = cur_str;
+		return 0;
+	}
+
+	//dfs部分：遍历各堆，进入各个子树
+	double rate = 0;
+	for (int i = 1; i <= n; i++) {
+
+		if (a[i] > 0) {
+			a[i]--;
+			cnt_a--;
+			rate += dfs(cur + 1, next_sib);
+			a[i]++;
+			cnt_a++;
+
+		}
+
+	}
+	for (int i = 1; i <= m; i++) {
+
+		if (b[i] > 0) {
+			b[i]--;
+			cnt_b--;
+			rate += dfs(cur + 1, next_sib);
+			b[i]++;
+			cnt_b++;
+
+		}
+	}
+	//记录概率、回传概率
+	map.insert({ cur_str,rate });
+	return rate * 1.0 / this_sibling;
+}
+
+
+int main() {
+	double ans = 0;
+	cin >> n >> m >> d;
+	for (int i = 1; i <= n; i++) {
+		cin >> a[i];
+		cnt_a += a[i];
+	}
+	for (int i = 1; i <= m; i++)
+	{
+		cin >> b[i];
+		cnt_b += b[i];
+	}
+
+	//几个特判：
+	if (d > cnt_b + cnt_a) {
+		ans = 1;
+		cout.setf(ios::fixed);
+		cout << setprecision(4) << ans << endl;
+		return 0;
+	}
+
+	if (d < cnt_b) {
+		ans = 0;
+		cout.setf(ios::fixed);
+		cout << setprecision(4) << ans << endl;
+		return 0;
+	}
+
+	ans = dfs(0, 1);
+
+	cout.setf(ios::fixed);
+	cout << setprecision(4) << ans << endl;
+	return 0;
+
+}
